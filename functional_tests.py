@@ -13,6 +13,11 @@ class NewVisitorTest(unittest.TestCase):
     def tearDown(self) -> None:
         self.browser.quit()
 
+    def check_for_row_task_table(self, row_text):
+        table = self.browser.find_element_by_id("id_task_table")
+        rows = table.find_elements_by_tag_name("tr")
+        self.assertIn(row_text, [row.text for row in rows])
+
     def test_can_create_a_list_and_load_it_by_url(self):
         # I m opening my to do list app
         self.browser.get("http://localhost:8000")
@@ -27,18 +32,15 @@ class NewVisitorTest(unittest.TestCase):
         # when I hit enter I see updated browser window with typed above task
         input_box.send_keys(Keys.ENTER)
         time.sleep(1.0)
-        table = self.browser.find_element_by_id("id_task_table")
-        rows = table.find_elements_by_tag_name("tr")
-        self.assertIn("1: zabotat ebalu", [row.text for row in rows])
+        self.check_for_row_task_table("1: zabotat ebalu")
         # I'm adding another task "zabotat druguyy ebalu"
         # when I hit enter I expect to see updated task list
         input_box = self.browser.find_element_by_id("id_new_item")
         input_box.send_keys("zabotat druguyu ebalu")
         input_box.send_keys(Keys.ENTER)
         time.sleep(1.0)
-        table = self.browser.find_element_by_id("id_task_table")
-        rows = table.find_elements_by_tag_name("tr")
-        self.assertIn("2: zabotat druguyu ebalu", [row.text for row in rows])
+        self.check_for_row_task_table("1: zabotat ebalu")
+        self.check_for_row_task_table("2: zabotat druguyu ebalu")
         self.fail("Dosviduli")
 
         # the list is serialized in the URL
