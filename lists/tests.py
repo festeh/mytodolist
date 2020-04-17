@@ -1,7 +1,5 @@
-from django.http import HttpRequest
 from django.test import TestCase
-from django.urls import resolve
-from lists.views import home_page
+from lists.models import Task
 
 
 class HomePageTest(TestCase):
@@ -13,3 +11,20 @@ class HomePageTest(TestCase):
         response = self.client.post("/", data={"task_text": "A new task"})
         self.assertIn("A new task", response.content.decode())
         self.assertTemplateUsed(response, "home.html")
+
+
+class TaskModelTest(TestCase):
+    def test_save_load_items(self):
+        first_item = Task()
+        first_item.text = "First one"
+        first_item.save()
+
+        second_item = Task()
+        second_item.text = "The second"
+        second_item.save()
+
+        saved_items = Task.objects.all()
+        self.assertEqual(len(saved_items), 2)
+
+        self.assertEqual(saved_items[0].text, "First one")
+        self.assertEqual(saved_items[1].text, "The second")
