@@ -29,7 +29,7 @@ class NewVisitorTest(unittest.TestCase):
         time.sleep(1.0)
         table = self.browser.find_element_by_id("id_task_table")
         rows = table.find_elements_by_tag_name("tr")
-        self.assertTrue(any(row.text == "1: zabotat ebalu" for row in rows))
+        self.assertTrue(any(row.text == "1: zabotat ebalu" for row in rows), "not found added task")
 
         # I'm adding another task "zabotat druguyy ebalu"
         self.fail("Dosviduli")
