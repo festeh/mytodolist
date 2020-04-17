@@ -29,12 +29,17 @@ class NewVisitorTest(unittest.TestCase):
         time.sleep(1.0)
         table = self.browser.find_element_by_id("id_task_table")
         rows = table.find_elements_by_tag_name("tr")
-        self.assertTrue(any(row.text == "1: zabotat ebalu" for row in rows), "not found added task")
-
+        self.assertIn("1: zabotat ebalu", [row.text for row in rows])
         # I'm adding another task "zabotat druguyy ebalu"
-        self.fail("Dosviduli")
-
         # when I hit enter I expect to see updated task list
+        input_box = self.browser.find_element_by_id("id_new_item")
+        input_box.send_keys("zabotat druguyu ebalu")
+        input_box.send_keys(Keys.ENTER)
+        time.sleep(1.0)
+        table = self.browser.find_element_by_id("id_task_table")
+        rows = table.find_elements_by_tag_name("tr")
+        self.assertIn("2: zabotat druguyu ebalu", [row.text for row in rows])
+        self.fail("Dosviduli")
 
         # the list is serialized in the URL
 
