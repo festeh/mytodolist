@@ -3,4 +3,3 @@ venv
 /static
 db.sqlite3
 *.log
-lists/static
