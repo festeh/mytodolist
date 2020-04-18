@@ -11,16 +11,23 @@ class HomePageTest(TestCase):
 class ListViewTest(TestCase):
 
     def test_corect_template_is_used(self):
-        response = self.client.get("/lists/my_unique_list/")
+        list_ = List.objects.create()
+        response = self.client.get(f"/lists/{list_.id}/")
         self.assertTemplateUsed(response, "list.html")
 
-    def test_task_list_is_shown(self):
+    def test_task_list_is_shown_and_only_these(self):
         parent_list = List.objects.create()
         Task.objects.create(text="get a bath", list=parent_list)
         Task.objects.create(text="drink a cup of coffee", list=parent_list)
-        response = self.client.get("/lists/my_unique_list/")
+        response = self.client.get(f"/lists/{parent_list.id}/")
         self.assertContains(response, "get a bath")
         self.assertContains(response, "drink a cup of coffee")
+        new_list = List.objects.create()
+        Task.objects.create(text="do some stuff", list=new_list)
+        response = self.client.get(f"/lists/{new_list.id}/")
+        self.assertNotContains(response, "get a bath")
+        self.assertNotContains(response, "drink a cup of coffee")
+        self.assertContains(response, "do some stuff")
 
 
 class NewListTest(TestCase):
@@ -31,11 +38,13 @@ class NewListTest(TestCase):
 
     def test_redirect_after_post_request(self):
         response = self.client.post("/lists/new", data={"task_text": "A new task"})
-        self.assertRedirects(response, "/lists/my_unique_list/")
+        # we created db from scratch so it's safe
+        created_list = List.objects.first()
+        self.assertRedirects(response, f"/lists/{created_list.id}/")
 
-    def test_only_save_nonempty_tasks(self):
-        self.client.post("/lists/new", data={"task_text": ""})
-        self.assertEqual(Task.objects.count(), 0)
+    # def test_only_save_nonempty_tasks(self):
+    #     self.client.post("/lists/new", data={"task_text": ""})
+    #     self.assertEqual(Task.objects.count(), 0)
 
 
 class ListAndTaskModelTest(TestCase):

@@ -7,12 +7,14 @@ def home_page(request: HttpRequest):
     return render(request, "home.html")
 
 
-def view_list(request):
-    return render(request, "list.html", {"items": Task.objects.all()})
+def view_list(request, list_id):
+    list_ = List.objects.get(id=list_id)
+    tasks = Task.objects.filter(list=list_)
+    return render(request, "list.html", {"items": tasks})
 
 
 def new_list(request):
     task_text = request.POST["task_text"]
-    if task_text:
-        Task.objects.create(text=task_text, list=List.objects.create())
-    return redirect("/lists/my_unique_list/")
+    list_ = List.objects.create()
+    Task.objects.create(text=task_text, list=list_)
+    return redirect(f"/lists/{list_.id}/")
