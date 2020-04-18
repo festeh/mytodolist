@@ -1,13 +1,10 @@
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Todo list</title>
-</head>
-<body>
-<h1>My Todo list</h1>
-<form method="POST" action="/lists/{{ list.id }}/add_task">
-    <input name="task_text" id="id_new_item" placeholder="Enter a task"/> {% csrf_token %}
-</form>
+{% extends 'base.html' %}
+
+{% block header_text %}Your Todo list{% endblock %}
+
+{% block form_action %}"/lists/{{ list.id }}/add_task"{% endblock %}
+
+{% block table %}
 <table id="id_task_table">
     {% for task in list.task_set.all %}
         <tr>
@@ -15,5 +12,4 @@
         </tr>
     {% endfor %}
 </table>
-</body>
-</html>
+{% endblock %}
