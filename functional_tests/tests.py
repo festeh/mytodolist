@@ -4,7 +4,10 @@ from django.test import LiveServerTestCase
 from selenium import webdriver
 import unittest
 
+from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.keys import Keys
+
+MAX_WAIT = 10
 
 
 class NewVisitorTest(LiveServerTestCase):
@@ -14,10 +17,18 @@ class NewVisitorTest(LiveServerTestCase):
     def tearDown(self) -> None:
         self.browser.quit()
 
-    def check_for_row_task_table(self, row_text):
-        table = self.browser.find_element_by_id("id_task_table")
-        rows = table.find_elements_by_tag_name("tr")
-        self.assertIn(row_text, [row.text for row in rows])
+    def wait_for_row_task_table(self, row_text):
+        start_time = time.time()
+        while True:
+            try:
+                table = self.browser.find_element_by_id("id_task_table")
+                rows = table.find_elements_by_tag_name("tr")
+                self.assertIn(row_text, [row.text for row in rows])
+                return
+            except (AssertionError, WebDriverException) as e:
+                if time.time() - start_time > MAX_WAIT:
+                    raise e
+                time.sleep(0.5)
 
     def test_can_create_a_list_and_load_it_by_url(self):
         # I m opening my to do list app
@@ -32,16 +43,17 @@ class NewVisitorTest(LiveServerTestCase):
 
         # when I hit enter I see updated browser window with typed above task
         input_box.send_keys(Keys.ENTER)
-        time.sleep(1.0)
-        self.check_for_row_task_table("1: zabotat ebalu")
+        self.wait_for_row_task_table("1: zabotat ebalu")
         # I'm adding another task "zabotat druguyy ebalu"
         # when I hit enter I expect to see updated task list
         input_box = self.browser.find_element_by_id("id_new_item")
         input_box.send_keys("zabotat druguyu ebalu")
         input_box.send_keys(Keys.ENTER)
-        time.sleep(1.0)
-        self.check_for_row_task_table("1: zabotat ebalu")
-        self.check_for_row_task_table("2: zabotat druguyu ebalu")
+        self.wait_for_row_task_table("1: zabotat ebalu")
+        self.wait_for_row_task_table("2: zabotat druguyu ebalu")
+
+
+
         self.fail("Dosviduli")
 
         # the list is serialized in the URL
