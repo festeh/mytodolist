@@ -1,3 +1,4 @@
+import os
 import time
 import unittest
 
@@ -12,6 +13,9 @@ MAX_WAIT = 3
 class NewVisitorTest(StaticLiveServerTestCase):
     def setUp(self) -> None:
         self.browser = webdriver.Chrome()
+        staging_server = os.environ.get("STAGING_SERVER")
+        if staging_server:
+            self.live_server_url = "http://" + staging_server
 
     def tearDown(self) -> None:
         self.browser.quit()
