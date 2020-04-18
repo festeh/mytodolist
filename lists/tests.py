@@ -29,6 +29,12 @@ class ListViewTest(TestCase):
         self.assertNotContains(response, "drink a cup of coffee")
         self.assertContains(response, "do some stuff")
 
+    def test_list_id_passed_to_template(self):
+        old_list = List.objects.create()
+        our_list = List.objects.create()
+        response = self.client.get(f"/lists/{our_list.id}/")
+        self.assertEqual(response.context["list"], our_list)
+
 
 class NewListTest(TestCase):
     def test_can_save_post_request(self):
@@ -47,9 +53,28 @@ class NewListTest(TestCase):
     #     self.assertEqual(Task.objects.count(), 0)
 
 
+class NewTaskExistingListTest(TestCase):
+    def test_can_add_new_task_existing_list(self):
+        old_list = List.objects.create()
+        our_list = List.objects.create()
+
+        self.client.post(f"/lists/{our_list.id}/add_task",
+                         data={"task_text": "And another one"})
+        self.assertEqual(Task.objects.count(), 1)
+        added_task = Task.objects.first()
+        self.assertEqual(added_task.text, "And another one")
+        self.assertEqual(added_task.list, our_list)
+
+    def test_correct_redirect_after_adding_task(self):
+        old_list = List.objects.create()
+        our_list = List.objects.create()
+        response = self.client.post(f"/lists/{our_list.id}/add_task",
+                                    data={"task_text": "And another one"})
+        self.assertRedirects(response, f"/lists/{our_list.id}/")
+
+
 class ListAndTaskModelTest(TestCase):
     def test_save_load_items(self):
-
         list_ = List()
         list_.save()
 

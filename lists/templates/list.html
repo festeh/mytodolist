@@ -5,13 +5,13 @@
 </head>
 <body>
 <h1>My Todo list</h1>
-<form method="POST" action="/lists/new">
+<form method="POST" action="/lists/{{ list.id }}/add_task">
     <input name="task_text" id="id_new_item" placeholder="Enter a task"/> {% csrf_token %}
 </form>
 <table id="id_task_table">
-    {% for item in items %}
+    {% for task in list.task_set.all %}
         <tr>
-            <td>{{ forloop.counter }}: {{ item.text }}</td>
+            <td>{{ forloop.counter }}: {{ task.text }}</td>
         </tr>
     {% endfor %}
 </table>
