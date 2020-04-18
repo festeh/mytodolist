@@ -40,7 +40,6 @@ class NewVisitorTest(LiveServerTestCase):
         input_box = self.browser.find_element_by_id("id_new_item")
         self.assertEqual(input_box.get_attribute("placeholder"), "Enter a task")
         input_box.send_keys("zabotat ebalu")
-
         # when I hit enter I see updated browser window with typed above task
         input_box.send_keys(Keys.ENTER)
         self.wait_for_row_task_table("1: zabotat ebalu")
@@ -51,16 +50,39 @@ class NewVisitorTest(LiveServerTestCase):
         input_box.send_keys(Keys.ENTER)
         self.wait_for_row_task_table("1: zabotat ebalu")
         self.wait_for_row_task_table("2: zabotat druguyu ebalu")
+        # self.fail("Dosviduli")
+        # # the list is serialized in the URL
+        # # when I navigate by URL i expect to see same list
+        # # end of story
 
+    def test_multiple_users_can_stat_list_different_url(self):
+        self.browser.get(self.live_server_url)
+        # I come and type a task
+        input_box = self.browser.find_element_by_id("id_new_item")
+        input_box.send_keys("my new task")
+        input_box.send_keys(Keys.ENTER)
+        self.wait_for_row_task_table("1: my new task")
+        # now list view is opened with corresponding url
+        my_url = self.browser.current_url
+        self.assertRegex(my_url, "/lists/.+")
+        # now second user opens the app
+        self.browser.quit()
+        self.browser = webdriver.Chrome()
+        self.browser.get(self.live_server_url)
+        # no signs of previous user
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn("my new task", page_text)
+        # she writes her task
+        input_box = self.browser.find_element_by_id("id_new_item")
+        input_box.send_keys("nogotochki")
+        input_box.send_keys(Keys.ENTER)
+        # she sees this task only
+        self.wait_for_row_task_table("1: nogotochki")
+        # url for task list is different
+        user_url = self.browser.current_url
+        self.assertRegex(user_url, "/lists/.+")
+        self.assertNotEqual(my_url, user_url)
 
-
-        self.fail("Dosviduli")
-
-        # the list is serialized in the URL
-
-        # when I navigate by URL i expect to see same list
-
-        # end of story
 
 
 if __name__ == "__main__":
