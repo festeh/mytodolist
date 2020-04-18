@@ -23,6 +23,11 @@ class HomePageTest(TestCase):
 
 
 class ListViewTest(TestCase):
+
+    def test_corect_template_is_used(self):
+        response = self.client.get("/lists/my_unique_list/")
+        self.assertTemplateUsed(response, "list.html")
+
     def test_task_list_is_shown(self):
         Task.objects.create(text="get a bath")
         Task.objects.create(text="drink a cup of coffee")

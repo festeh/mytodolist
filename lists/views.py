@@ -9,8 +9,8 @@ def home_page(request: HttpRequest):
         if task_text:
             Task.objects.create(text=task_text)
         return redirect("/lists/my_unique_list")
-    return render(request, "home.html", {"items": Task.objects.all()})
+    return render(request, "home.html")
 
 
 def view_list(request):
-    return render(request, "home.html", {"items": Task.objects.all()})
+    return render(request, "list.html", {"items": Task.objects.all()})

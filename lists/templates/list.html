@@ -4,9 +4,16 @@
     <title>Todo list</title>
 </head>
 <body>
-<h1>Add a new Todo list</h1>
+<h1>My Todo list</h1>
 <form method="POST" action="/">
     <input name="task_text" id="id_new_item" placeholder="Enter a task"/> {% csrf_token %}
 </form>
+<table id="id_task_table">
+    {% for item in items %}
+        <tr>
+            <td>{{ forloop.counter }}: {{ item.text }}</td>
+        </tr>
+    {% endfor %}
+</table>
 </body>
 </html>
