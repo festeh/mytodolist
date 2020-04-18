@@ -1,14 +1,15 @@
 import time
 
+from django.test import LiveServerTestCase
 from selenium import webdriver
 import unittest
 
 from selenium.webdriver.common.keys import Keys
 
 
-class NewVisitorTest(unittest.TestCase):
+class NewVisitorTest(LiveServerTestCase):
     def setUp(self) -> None:
-        self.browser = browser = webdriver.Chrome()
+        self.browser = webdriver.Chrome()
 
     def tearDown(self) -> None:
         self.browser.quit()
@@ -20,7 +21,7 @@ class NewVisitorTest(unittest.TestCase):
 
     def test_can_create_a_list_and_load_it_by_url(self):
         # I m opening my to do list app
-        self.browser.get("http://localhost:8000")
+        self.browser.get(self.live_server_url)
         # And expect to see corresponding title in the browser tab and the header
         self.assertIn("Todo", self.browser.title)
         self.assertIn("Todo", self.browser.find_element_by_tag_name("h1").text)
