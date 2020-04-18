@@ -7,20 +7,6 @@ class HomePageTest(TestCase):
         response = self.client.get("/")
         self.assertTemplateUsed(response, "home.html")
 
-    def test_can_save_post_request(self):
-        self.client.post("/", data={"task_text": "A new task"})
-        self.assertEqual(Task.objects.count(), 1)
-        self.assertEqual(Task.objects.first().text, "A new task")
-
-    def test_redirect_after_post_request(self):
-        response = self.client.post("/", data={"task_text": "A new task"})
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response["location"], "/lists/my_unique_list")
-
-    def test_only_save_nonempty_tasks(self):
-        self.client.post("/", data={"task_text": ""})
-        self.assertEqual(Task.objects.count(), 0)
-
 
 class ListViewTest(TestCase):
 
@@ -34,6 +20,21 @@ class ListViewTest(TestCase):
         response = self.client.get("/lists/my_unique_list/")
         self.assertContains(response, "get a bath")
         self.assertContains(response, "drink a cup of coffee")
+
+
+class NewListTest(TestCase):
+    def test_can_save_post_request(self):
+        self.client.post("/lists/new", data={"task_text": "A new task"})
+        self.assertEqual(Task.objects.count(), 1)
+        self.assertEqual(Task.objects.first().text, "A new task")
+
+    def test_redirect_after_post_request(self):
+        response = self.client.post("/lists/new", data={"task_text": "A new task"})
+        self.assertRedirects(response, "/lists/my_unique_list/")
+
+    def test_only_save_nonempty_tasks(self):
+        self.client.post("/lists/new", data={"task_text": ""})
+        self.assertEqual(Task.objects.count(), 0)
 
 
 class TaskModelTest(TestCase):
