@@ -15,18 +15,20 @@ class HomePageTest(TestCase):
     def test_redirect_after_post_request(self):
         response = self.client.post("/", data={"task_text": "A new task"})
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response["location"], "/")
+        self.assertEqual(response["location"], "/lists/my_unique_list")
 
     def test_only_save_nonempty_tasks(self):
         self.client.post("/", data={"task_text": ""})
         self.assertEqual(Task.objects.count(), 0)
 
-    def test_added_tasks_are_displayed(self):
-        task1 = Task.objects.create(text="get a bath")
-        task2 = Task.objects.create(text="drink a cup of coffee")
-        response_text = self.client.get("/").content.decode()
-        self.assertIn("get a bath", response_text)
-        self.assertIn("drink a cup of coffee", response_text)
+
+class ListViewTest(TestCase):
+    def test_task_list_is_shown(self):
+        Task.objects.create(text="get a bath")
+        Task.objects.create(text="drink a cup of coffee")
+        response = self.client.get("/lists/my_unique_list/")
+        self.assertContains(response, "get a bath")
+        self.assertContains(response, "drink a cup of coffee")
 
 
 class TaskModelTest(TestCase):
