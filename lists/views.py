@@ -1,11 +1,13 @@
 from django.core.exceptions import ValidationError
 from django.http import HttpRequest
 from django.shortcuts import render, redirect
+
+from lists.forms import TaskForm
 from lists.models import Task, List
 
 
 def home_page(request: HttpRequest):
-    return render(request, "home.html")
+    return render(request, "home.html", {"form": TaskForm()})
 
 
 def view_list(request, list_id):

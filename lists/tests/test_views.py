@@ -1,12 +1,17 @@
 from django.test import TestCase
 
+from lists.forms import TaskForm
 from lists.models import List, Task
 
 
 class HomePageTest(TestCase):
-    def test_home_page_resturns_correct_response(self):
+    def test_home_page_uses_correct_template(self):
         response = self.client.get("/")
         self.assertTemplateUsed(response, "home.html")
+
+    def test_home_page_uses_task_form(self):
+        response = self.client.get("/")
+        self.assertIsInstance(response.context["form"], TaskForm)
 
 
 class ListViewTest(TestCase):
