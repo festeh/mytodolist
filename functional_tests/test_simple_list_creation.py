@@ -13,7 +13,7 @@ class NewVisitorTest(FunctionalTest):
         self.assertIn("Todo", self.browser.title)
         self.assertIn("Todo", self.browser.find_element_by_tag_name("h1").text)
         # I'm typing "zabotat ebalu" into text box with "Enter a task" placeholder"
-        input_box = self.browser.find_element_by_id("id_new_item")
+        input_box = self.get_input_box_id()
         self.assertEqual(input_box.get_attribute("placeholder"), "Enter a task")
         input_box.send_keys("zabotat ebalu")
         # when I hit enter I see updated browser window with typed above task
@@ -21,7 +21,7 @@ class NewVisitorTest(FunctionalTest):
         self.wait_for_row_task_table("1: zabotat ebalu")
         # I'm adding another task "zabotat druguyy ebalu"
         # when I hit enter I expect to see updated task list
-        input_box = self.browser.find_element_by_id("id_new_item")
+        input_box = self.get_input_box_id()
         input_box.send_keys("zabotat druguyu ebalu")
         input_box.send_keys(Keys.ENTER)
         self.wait_for_row_task_table("1: zabotat ebalu")
@@ -34,7 +34,7 @@ class NewVisitorTest(FunctionalTest):
     def test_multiple_users_can_stat_list_different_url(self):
         self.browser.get(self.live_server_url)
         # I come and type a task
-        input_box = self.browser.find_element_by_id("id_new_item")
+        input_box = self.get_input_box_id()
         input_box.send_keys("my new task")
         input_box.send_keys(Keys.ENTER)
         self.wait_for_row_task_table("1: my new task")
@@ -49,7 +49,7 @@ class NewVisitorTest(FunctionalTest):
         page_text = self.browser.find_element_by_tag_name('body').text
         self.assertNotIn("my new task", page_text)
         # she writes her task
-        input_box = self.browser.find_element_by_id("id_new_item")
+        input_box = self.get_input_box_id()
         input_box.send_keys("nogotochki")
         input_box.send_keys(Keys.ENTER)
         # she sees this task only

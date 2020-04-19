@@ -15,7 +15,7 @@ def view_list(request, list_id):
     error = None
     if request.method == "POST":
         try:
-            task = Task(text=request.POST["task_text"], list=list_)
+            task = Task(text=request.POST["text"], list=list_)
             task.full_clean()
             task.save()
             return redirect(list_)
@@ -26,7 +26,7 @@ def view_list(request, list_id):
 
 def new_list(request):
     list_ = List.objects.create()
-    task = Task(text=request.POST["task_text"], list=list_)
+    task = Task(text=request.POST["text"], list=list_)
     try:
         task.full_clean()
         task.save()

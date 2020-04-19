@@ -29,6 +29,7 @@ class FunctionalTest(StaticLiveServerTestCase):
                 time.sleep(0.5)
 
     def wait_for_row_task_table(self, row_text):
+        start_time = time.time()
         while True:
             try:
                 table = self.browser.find_element_by_id("id_task_table")
@@ -39,3 +40,6 @@ class FunctionalTest(StaticLiveServerTestCase):
                 if time.time() - start_time > MAX_WAIT:
                     raise e
                 time.sleep(0.5)
+
+    def get_input_box_id(self):
+        return self.browser.find_element_by_id("id_text")

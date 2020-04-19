@@ -46,7 +46,7 @@ class ListViewTest(TestCase):
         our_list = List.objects.create()
 
         self.client.post(f"/lists/{our_list.id}/",
-                         data={"task_text": "And another one"})
+                         data={"text": "And another one"})
         self.assertEqual(Task.objects.count(), 1)
         added_task = Task.objects.first()
         self.assertEqual(added_task.text, "And another one")
@@ -56,13 +56,13 @@ class ListViewTest(TestCase):
         old_list = List.objects.create()
         our_list = List.objects.create()
         response = self.client.post(f"/lists/{our_list.id}/",
-                                    data={"task_text": "And another one"})
+                                    data={"text": "And another one"})
         self.assertRedirects(response, f"/lists/{our_list.id}/")
 
     def test_validation_errors_are_passed_to_list_page(self):
         old_list = List.objects.create()
         our_list = List.objects.create()
-        response = self.client.post(f"/lists/{our_list.id}/", data={"task_text": ""})
+        response = self.client.post(f"/lists/{our_list.id}/", data={"text": ""})
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "list.html")
         err_msg = "Cannot add an empty task"
@@ -71,28 +71,28 @@ class ListViewTest(TestCase):
 
 class NewListTest(TestCase):
     def test_can_save_post_request(self):
-        self.client.post("/lists/new", data={"task_text": "A new task"})
+        self.client.post("/lists/new", data={"text": "A new task"})
         self.assertEqual(Task.objects.count(), 1)
         self.assertEqual(Task.objects.first().text, "A new task")
 
     def test_redirect_after_post_request(self):
-        response = self.client.post("/lists/new", data={"task_text": "A new task"})
+        response = self.client.post("/lists/new", data={"text": "A new task"})
         # we created db from scratch so it's safe
         created_list = List.objects.first()
         self.assertRedirects(response, f"/lists/{created_list.id}/")
 
     def test_validation_errors_are_passed_to_home_page(self):
-        response = self.client.post("/lists/new", data={"task_text": ""})
+        response = self.client.post("/lists/new", data={"text": ""})
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "home.html")
         err_msg = "Cannot add an empty task"
         self.assertContains(response, err_msg)
 
     def test_empty_tasks_not_saved(self):
-        self.client.post("/lists/new", data={"task_text": ""})
+        self.client.post("/lists/new", data={"text": ""})
         self.assertEqual(List.objects.count(), 0)
         self.assertEqual(Task.objects.count(), 0)
 
     # def test_only_save_nonempty_tasks(self):
-    #     self.client.post("/lists/new", data={"task_text": ""})
+    #     self.client.post("/lists/new", data={"text": ""})
     #     self.assertEqual(Task.objects.count(), 0)
