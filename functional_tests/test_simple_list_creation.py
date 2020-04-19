@@ -1,37 +1,10 @@
-import os
-import time
-import unittest
-
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
-from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.keys import Keys
 
-MAX_WAIT = 10
+from functional_tests.base import FunctionalTest
 
 
-class NewVisitorTest(StaticLiveServerTestCase):
-    def setUp(self) -> None:
-        self.browser = webdriver.Chrome()
-        staging_server = os.environ.get("STAGING_SERVER")
-        if staging_server:
-            self.live_server_url = "http://" + staging_server
-
-    def tearDown(self) -> None:
-        self.browser.quit()
-
-    def wait_for_row_task_table(self, row_text):
-        start_time = time.time()
-        while True:
-            try:
-                table = self.browser.find_element_by_id("id_task_table")
-                rows = table.find_elements_by_tag_name("tr")
-                self.assertIn(row_text, [row.text for row in rows])
-                return
-            except (AssertionError, WebDriverException) as e:
-                if time.time() - start_time > MAX_WAIT:
-                    raise e
-                time.sleep(0.5)
+class NewVisitorTest(FunctionalTest):
 
     def test_can_create_a_list_and_load_it_by_url(self):
         # I m opening my to do list app
@@ -85,26 +58,3 @@ class NewVisitorTest(StaticLiveServerTestCase):
         user_url = self.browser.current_url
         self.assertRegex(user_url, "/lists/.+")
         self.assertNotEqual(my_url, user_url)
-
-    def test_layout_styling(self):
-        # I'm opening home page and expect to see nice CENTERED task field
-        self.browser.get(self.live_server_url)
-        self.browser.set_window_size(1024, 768)
-        input_box = self.browser.find_element_by_id("id_new_item")
-        # rounding errors ( ͡° ͜ʖ ͡°)
-        self.assertAlmostEqual(input_box.location["x"] + input_box.size['width'] / 2,
-                               512,
-                               delta=10)
-        # Then I add a task and and expect to see same field position on new page
-        input_box = self.browser.find_element_by_id("id_new_item")
-        input_box.send_keys("my new task")
-        input_box.send_keys(Keys.ENTER)
-        self.wait_for_row_task_table('1: my new task')
-        input_box = self.browser.find_element_by_id("id_new_item")
-        self.assertAlmostEqual(input_box.location["x"] + input_box.size['width'] / 2,
-                               512,
-                               delta=10)
-
-
-if __name__ == "__main__":
-    unittest.main()
