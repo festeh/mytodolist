@@ -12,26 +12,23 @@ def home_page(request: HttpRequest):
 
 def view_list(request, list_id):
     list_ = List.objects.get(id=list_id)
-    error = None
+    form = TaskForm()
     if request.method == "POST":
-        try:
-            task = Task(text=request.POST["text"], list=list_)
-            task.full_clean()
-            task.save()
+        form = TaskForm(data=request.POST)
+        if form.is_valid():
+            Task.objects.create(text=request.POST["text"], list=list_)
             return redirect(list_)
-        except ValidationError:
-            error = "Cannot add an empty task"
-    return render(request, "list.html", {"list": list_, "error": error})
+    return render(request, "list.html", {"list": list_,
+                                         "form": form,
+                                         })
 
 
 def new_list(request):
-    list_ = List.objects.create()
-    task = Task(text=request.POST["text"], list=list_)
-    try:
-        task.full_clean()
-        task.save()
-    except ValidationError:
-        list_.delete()
-        err_msg = "Cannot add an empty task"
-        return render(request, "home.html", {"error": err_msg})
-    return redirect(list_)
+    form = TaskForm(data=request.POST)
+    if form.is_valid():
+        list_ = List.objects.create()
+        Task.objects.create(text=request.POST["text"], list=list_)
+        return redirect(list_)
+    else:
+        return render(request, "home.html", {"form": form})
+

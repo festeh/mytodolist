@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from lists.forms import TaskForm
+from lists.forms import TaskForm, EMPTY_TASK_ERROR
 from lists.models import List, Task
 
 
@@ -15,6 +15,10 @@ class HomePageTest(TestCase):
 
 
 class ListViewTest(TestCase):
+
+    def post_empty_task(self):
+        our_list = List.objects.create()
+        return self.client.post(f"/lists/{our_list.id}/", data={"text": ""})
 
     def test_corect_template_is_used(self):
         list_ = List.objects.create()
@@ -59,14 +63,22 @@ class ListViewTest(TestCase):
                                     data={"text": "And another one"})
         self.assertRedirects(response, f"/lists/{our_list.id}/")
 
-    def test_validation_errors_are_passed_to_list_page(self):
-        old_list = List.objects.create()
-        our_list = List.objects.create()
-        response = self.client.post(f"/lists/{our_list.id}/", data={"text": ""})
+    def test_empty_task_not_saved(self):
+        self.post_empty_task()
+        self.assertEqual(Task.objects.count(), 0)
+
+    def test_empty_task_leads_to_same_page(self):
+        response = self.post_empty_task()
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "list.html")
-        err_msg = "Cannot add an empty task"
-        self.assertContains(response, err_msg)
+
+    def test_empty_task_passes_form_template(self):
+        response = self.post_empty_task()
+        self.assertIsInstance(response.context['form'], TaskForm)
+
+    def test_empty_task_error_message_shown(self):
+        response = self.post_empty_task()
+        self.assertContains(response, EMPTY_TASK_ERROR)
 
 
 class NewListTest(TestCase):
@@ -81,12 +93,18 @@ class NewListTest(TestCase):
         created_list = List.objects.first()
         self.assertRedirects(response, f"/lists/{created_list.id}/")
 
-    def test_validation_errors_are_passed_to_home_page(self):
+    def test_empty_task_input_leads_home_page(self):
         response = self.client.post("/lists/new", data={"text": ""})
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "home.html")
-        err_msg = "Cannot add an empty task"
-        self.assertContains(response, err_msg)
+
+    def test_empty_task_input_leads_to_home_page_with_correct_form(self):
+        response = self.client.post("/lists/new", data={"text": ""})
+        self.assertIsInstance(response.context['form'], TaskForm)
+
+    def test_empty_task_input_leads_to_correct_error_msg(self):
+        response = self.client.post("/lists/new", data={"text": ""})
+        self.assertContains(response, EMPTY_TASK_ERROR)
 
     def test_empty_tasks_not_saved(self):
         self.client.post("/lists/new", data={"text": ""})
