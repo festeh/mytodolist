@@ -9,11 +9,17 @@ def home_page(request: HttpRequest):
 
 
 def view_list(request, list_id):
+    list_ = List.objects.get(id=list_id)
+    error = None
     if request.method == "POST":
-        list_ = List.objects.get(id=list_id)
-        Task.objects.create(text=request.POST["task_text"], list=list_)
-        return redirect(f"/lists/{list_.id}/")
-    return render(request, "list.html", {"list": List.objects.get(id=list_id)})
+        try:
+            task = Task(text=request.POST["task_text"], list=list_)
+            task.full_clean()
+            task.save()
+            return redirect(f"/lists/{list_.id}/")
+        except ValidationError:
+            error = "Cannot add an empty task"
+    return render(request, "list.html", {"list": list_, "error": error})
 
 
 def new_list(request):

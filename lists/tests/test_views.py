@@ -54,6 +54,15 @@ class ListViewTest(TestCase):
                                     data={"task_text": "And another one"})
         self.assertRedirects(response, f"/lists/{our_list.id}/")
 
+    def test_validation_errors_are_passed_to_list_page(self):
+        old_list = List.objects.create()
+        our_list = List.objects.create()
+        response = self.client.post(f"/lists/{our_list.id}/", data={"task_text": ""})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "list.html")
+        err_msg = "Cannot add an empty task"
+        self.assertContains(response, err_msg)
+
 
 class NewListTest(TestCase):
     def test_can_save_post_request(self):
@@ -67,7 +76,7 @@ class NewListTest(TestCase):
         created_list = List.objects.first()
         self.assertRedirects(response, f"/lists/{created_list.id}/")
 
-    def test_validation_errors_are_passed_to_template(self):
+    def test_validation_errors_are_passed_to_home_page(self):
         response = self.client.post("/lists/new", data={"task_text": ""})
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "home.html")
