@@ -17,6 +17,11 @@
                 <input class="form-control input-lg" name="task_text" id="id_new_item" placeholder="Enter a task"/>
 
                 {% csrf_token %}
+                {% if error %}
+                    <div class="form-group has-error">
+                        <span class="help-block">{{ error }}</span>
+                    </div>
+                {% endif %}
             </form>
         </div>
     </div>

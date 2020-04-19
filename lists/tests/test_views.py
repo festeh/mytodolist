@@ -49,6 +49,18 @@ class NewListTest(TestCase):
         created_list = List.objects.first()
         self.assertRedirects(response, f"/lists/{created_list.id}/")
 
+    def test_validation_errors_are_passed_to_template(self):
+        response = self.client.post("/lists/new", data={"task_text": ""})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "home.html")
+        err_msg = "Cannot add an empty task"
+        self.assertContains(response, err_msg)
+
+    def test_empty_tasks_not_saved(self):
+        self.client.post("/lists/new", data={"task_text": ""})
+        self.assertEqual(List.objects.count(), 0)
+        self.assertEqual(Task.objects.count(), 0)
+
     # def test_only_save_nonempty_tasks(self):
     #     self.client.post("/lists/new", data={"task_text": ""})
     #     self.assertEqual(Task.objects.count(), 0)

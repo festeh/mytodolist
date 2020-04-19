@@ -1,9 +1,18 @@
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 from lists.models import List, Task
 
 
 class ListAndTaskModelTest(TestCase):
+
+    def test_cannot_add_empty_task(self):
+        list_ = List.objects.create()
+        task = Task(list=list_, text='')
+        with self.assertRaises(ValidationError):
+            task.full_clean()
+            task.save()
+
     def test_save_load_items(self):
         list_ = List()
         list_.save()
