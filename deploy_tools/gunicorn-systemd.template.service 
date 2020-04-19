@@ -1,0 +1,15 @@
+[Unit]
+Description=Gunicorn server for DOMAIN
+
+[Service]
+Restart=on-failure
+User=dima
+WorkingDirectory=/home/dima/sites/DOMAIN
+EnvironmentFile=/home/dima/sites/DOMAIN/.env
+
+ExecStart=/home/dima/sites/DOMAIN/virtualenv/bin/gunicorn \
+    --bind unix:/tmp/DOMAIN.socket \
+    superlists.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
