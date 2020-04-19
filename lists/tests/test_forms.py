@@ -1,6 +1,7 @@
 from unittest.case import TestCase
 
 from lists.forms import TaskForm, EMPTY_TASK_ERROR
+from lists.models import List, Task
 
 
 class ItemFormTest(TestCase):
@@ -14,3 +15,11 @@ class ItemFormTest(TestCase):
         # has a side effect of populating errors
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors['text'], [EMPTY_TASK_ERROR])
+
+    def test_form_saves_input_to_list(self):
+        list_ = List.objects.create()
+        form = TaskForm(data={'text': 'a new task'})
+        new_task = form.save(for_list=list_)
+        self.assertEqual(new_task, Task.objects.first())
+        self.assertEqual(new_task.text, "a new task")
+        self.assertEqual(new_task.list, list_)

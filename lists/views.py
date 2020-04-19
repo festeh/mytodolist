@@ -16,7 +16,7 @@ def view_list(request, list_id):
     if request.method == "POST":
         form = TaskForm(data=request.POST)
         if form.is_valid():
-            Task.objects.create(text=request.POST["text"], list=list_)
+            form.save(for_list=list_)
             return redirect(list_)
     return render(request, "list.html", {"list": list_,
                                          "form": form,
@@ -27,7 +27,7 @@ def new_list(request):
     form = TaskForm(data=request.POST)
     if form.is_valid():
         list_ = List.objects.create()
-        Task.objects.create(text=request.POST["text"], list=list_)
+        form.save(for_list=list_)
         return redirect(list_)
     else:
         return render(request, "home.html", {"form": form})
