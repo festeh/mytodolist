@@ -18,8 +18,17 @@ class FunctionalTest(StaticLiveServerTestCase):
     def tearDown(self) -> None:
         self.browser.quit()
 
-    def wait_for_row_task_table(self, row_text):
+    def wait_for(self, fn):
         start_time = time.time()
+        while True:
+            try:
+                return fn()
+            except (AssertionError, WebDriverException) as e:
+                if time.time() - start_time > MAX_WAIT:
+                    raise e
+                time.sleep(0.5)
+
+    def wait_for_row_task_table(self, row_text):
         while True:
             try:
                 table = self.browser.find_element_by_id("id_task_table")
