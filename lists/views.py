@@ -16,7 +16,7 @@ def view_list(request, list_id):
             task = Task(text=request.POST["task_text"], list=list_)
             task.full_clean()
             task.save()
-            return redirect(f"/lists/{list_.id}/")
+            return redirect(list_)
         except ValidationError:
             error = "Cannot add an empty task"
     return render(request, "list.html", {"list": list_, "error": error})
@@ -32,4 +32,4 @@ def new_list(request):
         list_.delete()
         err_msg = "Cannot add an empty task"
         return render(request, "home.html", {"error": err_msg})
-    return redirect(f"/lists/{list_.id}/")
+    return redirect(list_)
