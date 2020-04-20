@@ -8,5 +8,13 @@ class List(models.Model):
 
 
 class Task(models.Model):
+
+    class Meta:
+        ordering = ('id', )
+        unique_together = ('list', 'text')
+
     text = models.TextField(default="")
     list = models.ForeignKey(List, default=None)
+
+    def __str__(self):
+        return self.text

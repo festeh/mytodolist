@@ -4,7 +4,7 @@ from django.test import TestCase
 from lists.models import List, Task
 
 
-class ListAndTaskModelTest(TestCase):
+class TaskModelTest(TestCase):
 
     def test_cannot_add_empty_task(self):
         list_ = List.objects.create()
@@ -13,31 +13,17 @@ class ListAndTaskModelTest(TestCase):
             task.full_clean()
             task.save()
 
-    def test_save_load_items(self):
-        list_ = List()
-        list_.save()
+    def test_default_text(self):
+        task = Task()
+        self.assertEqual(task.text, '')
 
-        first_item = Task()
-        first_item.text = "First one"
-        first_item.list = list_
-        first_item.save()
+    def test_task_related_list(self):
+        list_ = List.objects.create()
+        task = Task.objects.create(text="hoba", list=list_)
+        self.assertIn(task, list_.task_set.all())
 
-        second_item = Task()
-        second_item.text = "The second"
-        second_item.list = list_
-        second_item.save()
 
-        saved_list = List.objects.first()
-        self.assertEqual(list_, saved_list)
-
-        saved_items = Task.objects.all()
-        self.assertEqual(len(saved_items), 2)
-
-        self.assertEqual(saved_items[0].text, "First one")
-        self.assertEqual(saved_items[0].list, list_)
-        self.assertEqual(saved_items[1].text, "The second")
-        self.assertEqual(saved_items[1].list, list_)
-
+class ListModelTest(TestCase):
     def test_get_absolute_url_list(self):
         list_ = List.objects.create()
         self.assertEqual(list_.get_absolute_url(), f'/lists/{list_.id}/')
