@@ -1,10 +1,11 @@
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.test import TestCase
-from lists.forms import TaskForm, EMPTY_TASK_ERROR
+from lists.forms import TaskForm, EMPTY_TASK_ERROR, DUPLICATING_TASK_ERROR, ExistingListTaskForm
 from lists.models import List, Task
 
 
-class ItemFormTest(TestCase):
+class TaskFormTest(TestCase):
     def test_form_had_placeholder_and_bs_class(self):
         form = TaskForm()
         self.assertIn('placeholder="Enter a task"', form.as_p())
@@ -27,8 +28,9 @@ class ItemFormTest(TestCase):
     def test_duplicating_tasks_not_allowed(self):
         list_ = List.objects.create()
         Task.objects.create(text="just do it", list=list_)
-        with self.assertRaises(IntegrityError):
-            Task.objects.create(text="just do it", list=list_)
+        with self.assertRaises(ValidationError):
+            task = Task(text="just do it", list=list_)
+            task.full_clean()
 
     def test_duplicating_tasks_different_lists_allowed(self):
         list1 = List.objects.create()
@@ -48,3 +50,30 @@ class ItemFormTest(TestCase):
         list_ = List.objects.create()
         task = Task.objects.create(text="this is no ordinary love", list=list_)
         self.assertEqual(str(task), task.text)
+
+
+class ExistingListTaskFormTest(TestCase):
+    def test_form_had_placeholder_and_bs_class(self):
+        form = ExistingListTaskForm(for_list=List.objects.create())
+        self.assertIn('placeholder="Enter a task"', form.as_p())
+        self.assertIn('class="form-control input-lg"', form.as_p())
+
+    def test_from_validation_empty_task(self):
+        form = ExistingListTaskForm(for_list=List.objects.create(),data={"text": ""})
+        # has a side effect of populating errors
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors['text'], [EMPTY_TASK_ERROR])
+
+    def test_from_validation_duplicate(self):
+        list_ = List.objects.create()
+        Task.objects.create(text="just do it", list=list_)
+        form = ExistingListTaskForm(for_list=list_,
+                                    data={"text": "just do it"})
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors['text'], [DUPLICATING_TASK_ERROR])
+
+    def test_form_save(self):
+        list_ = List.objects.create()
+        form = ExistingListTaskForm(for_list=list_, data={'text': 'hi there'})
+        new_task = form.save()
+        self.assertEqual(new_task, Task.objects.all()[0])

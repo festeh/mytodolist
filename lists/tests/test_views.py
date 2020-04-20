@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from lists.forms import TaskForm, EMPTY_TASK_ERROR
+from lists.forms import TaskForm, EMPTY_TASK_ERROR, DUPLICATING_TASK_ERROR, ExistingListTaskForm
 from lists.models import List, Task
 
 
@@ -74,11 +74,26 @@ class ListViewTest(TestCase):
 
     def test_empty_task_passes_form_template(self):
         response = self.post_empty_task()
-        self.assertIsInstance(response.context['form'], TaskForm)
+        self.assertIsInstance(response.context['form'], ExistingListTaskForm)
+
+    def test_adding_duplicate_task_leads_to_error_message(self):
+        list_ = List.objects.create()
+        Task.objects.create(text="my task", list=list_)
+        response = self.client.post(f"/lists/{list_.id}/",
+                                    data={"text": "my task"})
+        self.assertContains(response, DUPLICATING_TASK_ERROR)
+        self.assertTemplateUsed(response, "list.html")
+        self.assertEqual(Task.objects.count(), 1)
 
     def test_empty_task_error_message_shown(self):
         response = self.post_empty_task()
         self.assertContains(response, EMPTY_TASK_ERROR)
+
+    def test_task_form_is_displayed(self):
+        list_ = List.objects.create()
+        response = self.client.get(f"/lists/{list_.id}/")
+        self.assertIsInstance(response.context['form'], ExistingListTaskForm)
+        self.assertContains(response, 'name="text"')
 
 
 class NewListTest(TestCase):
@@ -110,7 +125,3 @@ class NewListTest(TestCase):
         self.client.post("/lists/new", data={"text": ""})
         self.assertEqual(List.objects.count(), 0)
         self.assertEqual(Task.objects.count(), 0)
-
-    # def test_only_save_nonempty_tasks(self):
-    #     self.client.post("/lists/new", data={"text": ""})
-    #     self.assertEqual(Task.objects.count(), 0)
