@@ -1,3 +1,25 @@
 #id_new_item {
     margin-top: 2ex;
 }
+
+ blockquote {
+    border-left: none;
+    margin: 10px;
+}
+
+ blockquote :before {
+    content: "\f10d";
+    left: -5rem;
+	top: -2rem;
+}
+
+  blockquote :after {
+    content: "\f10e";
+    left: -5rem;
+	top: -2rem;
+}
+
+ blockquote div {
+     font-family: 'Fontawesome', cursive;
+     font-size: 30px;
+ }
