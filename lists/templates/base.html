@@ -48,7 +48,11 @@
 <script src="/static/jquery-3.5.0.min.js"></script>
 <script src="/static/list.js"></script>
 <script>
-    initialize();
+    $(document).ready(
+        function () {
+            window.Superlists.initialize();
+        }
+    )
 </script>
 
 </body>
