@@ -1,3 +1,4 @@
+from django.contrib import auth
 from django.test import TestCase
 
 # Create your tests here.
@@ -14,6 +15,11 @@ class UserModelTest(TestCase):
     def test_email_is_primary_key(self):
         user = User(email=self.EMAIL)
         self.assertEqual(user.pk, self.EMAIL)
+
+    def test_no_problem_auth_login(self):
+        user = User.objects.create(email=self.EMAIL)
+        user.backend = ''
+        auth.login(self.client.request().wsgi_request, user)
 
 
 class TokenModelTest(TestCase):
