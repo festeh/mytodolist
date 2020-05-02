@@ -11,7 +11,7 @@ def send_login_email(request):
     token = Token.objects.create(email=email)
     login_link = request.build_absolute_uri(f'{reverse("login")}?token={token.uid}')
     send_mail("Your login link for TODO task list",
-              f"Use this link to login: {login_link}", "noreply@tasklist", [email])
+              f"Use this link to login: {login_link}", "testinggoat@mail.ru", [email])
     messages.success(request,
                      "Check your email for login link")
     return redirect("/")

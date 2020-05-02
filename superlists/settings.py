@@ -137,8 +137,8 @@ AUTH_USER_MODEL = 'accounts.User'
 AUTHENTICATION_BACKENDS = [
     'accounts.authentication.PasswordlessAuthBackend',
 ]
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'siboky@gmail.com'
+EMAIL_HOST = 'smtp.mail.ru'
+EMAIL_HOST_USER = 'testinggoat@mail.ru'
 EMAIL_HOST_PASSWORD = os.environ.get('EMAILPASSWORD')
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
