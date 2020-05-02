@@ -36,13 +36,10 @@ class LoginTest(FunctionalTest):
         self.browser.get(url)
 
         # My email is displayed on the page
-        self.wait_for(lambda: self.browser.find_element_by_link_text("Logout"))
-        navbar = self.browser.find_element_by_css_selector(".navbar")
-        self.assertIn(TEST_EMAIL, navbar.text)
+        self.wait_for_login(TEST_EMAIL)
 
         # Now I'm logging out
         self.browser.find_element_by_link_text("Logout").click()
 
         # Enter email field should return, my email should not be shown
-        self.wait_for(lambda: self.browser.find_element_by_name("email"))
-        self.assertNotIn(TEST_EMAIL, self.browser.find_element_by_css_selector(".navbar").text)
+        self.wait_for_logout(TEST_EMAIL)
