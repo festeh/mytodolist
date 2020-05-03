@@ -5,8 +5,14 @@ from django.urls import reverse
 
 
 class List(models.Model):
+
     def get_absolute_url(self):
         return reverse('view_list', args=[self.id])
+
+    @property
+    def name(self):
+        return self.task_set.first().text
+
     owner = ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
 
 

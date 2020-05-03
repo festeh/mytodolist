@@ -38,4 +38,7 @@ class ListModelTest(TestCase):
         self.assertIn(task_list, user.list_set.all())
 
     def test_owner_is_optional(self):
-        List.objects.create()
+        task_list = List.objects.create()
+        Task.objects.create(list=task_list, text="First task")
+        Task.objects.create(list=task_list, text="Second task")
+        self.assertEqual(task_list.name, "First task")
