@@ -27,12 +27,7 @@ def wait(fn):
 
 class FunctionalTest(StaticLiveServerTestCase):
     def setUp(self) -> None:
-        options = webdriver.ChromeOptions()
-        options.add_argument("--headless")
-        options.add_argument("--disable-extensions")
-        options.add_argument("--disable-dev-shm-usage")
-        options.add_argument("--no-sandbox")
-        self.browser = webdriver.Chrome(chrome_options=options)
+        self.browser = self.setup_browser()
         self.staging_server = os.environ.get("STAGING_SERVER")
         if self.staging_server:
             self.live_server_url = "http://" + self.staging_server
@@ -73,4 +68,10 @@ class FunctionalTest(StaticLiveServerTestCase):
         task_num = n_rows + 1
         self.wait_for_row_task_table(f"{task_num}: {task_text}")
 
-
+    def setup_browser(self):
+        options = webdriver.ChromeOptions()
+        options.add_argument("--headless")
+        options.add_argument("--disable-extensions")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--no-sandbox")
+        return webdriver.Chrome(chrome_options=options)

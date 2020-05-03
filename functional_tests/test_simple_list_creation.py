@@ -43,7 +43,7 @@ class NewVisitorTest(FunctionalTest):
         self.assertRegex(my_url, "/lists/.+")
         # now second user opens the app
         self.browser.quit()
-        self.browser = webdriver.Chrome()
+        self.browser = self.setup_browser()
         self.browser.get(self.live_server_url)
         # no signs of previous user
         page_text = self.browser.find_element_by_tag_name('body').text
