@@ -1,7 +1,10 @@
+import unittest
+from unittest.mock import patch, Mock
+
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.test import TestCase
-from lists.forms import TaskForm, EMPTY_TASK_ERROR, DUPLICATING_TASK_ERROR, ExistingListTaskForm
+from lists.forms import TaskForm, EMPTY_TASK_ERROR, DUPLICATING_TASK_ERROR, ExistingListTaskForm, NewListTaskForm
 from lists.models import List, Task
 
 
@@ -16,14 +19,6 @@ class TaskFormTest(TestCase):
         # has a side effect of populating errors
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors['text'], [EMPTY_TASK_ERROR])
-
-    def test_form_saves_input_to_list(self):
-        list_ = List.objects.create()
-        form = TaskForm(data={'text': 'a new task'})
-        new_task = form.save(for_list=list_)
-        self.assertEqual(new_task, Task.objects.first())
-        self.assertEqual(new_task.text, "a new task")
-        self.assertEqual(new_task.list, list_)
 
     def test_duplicating_tasks_not_allowed(self):
         list_ = List.objects.create()
@@ -52,6 +47,37 @@ class TaskFormTest(TestCase):
         self.assertEqual(str(task), task.text)
 
 
+class NewListTaskFormTest(unittest.TestCase):
+
+    @patch("lists.forms.List.create_new")
+    def test_creates_new_list_unauthd_user(self, mock_list_create_new):
+        user = Mock(is_authenticated=False)
+        form = NewListTaskForm(data={"text": "a new task"})
+        form.is_valid()
+        form.save(owner=user)
+        mock_list_create_new.assert_called_once_with(
+            first_task_text="a new task"
+        )
+
+    @patch("lists.forms.List.create_new")
+    def test_creates_new_list_authd_user(self, mock_list_create_new):
+        user = Mock(is_authenticated=True)
+        form = NewListTaskForm(data={"text": "a new task"})
+        form.is_valid()
+        form.save(owner=user)
+        mock_list_create_new.assert_called_once_with(
+            first_task_text="a new task", owner=user
+        )
+
+    @patch("lists.forms.List.create_new")
+    def test_save_returns_new_list_object(self, mock_list_create_new):
+        user = Mock(is_authenticated=True)
+        form = NewListTaskForm(data={"text": "a new task"})
+        form.is_valid()
+        response = form.save(user)
+        self.assertEqual(response, mock_list_create_new.return_value)
+
+
 class ExistingListTaskFormTest(TestCase):
     def test_form_had_placeholder_and_bs_class(self):
         form = ExistingListTaskForm(for_list=List.objects.create())
@@ -59,7 +85,7 @@ class ExistingListTaskFormTest(TestCase):
         self.assertIn('class="form-control input-lg"', form.as_p())
 
     def test_from_validation_empty_task(self):
-        form = ExistingListTaskForm(for_list=List.objects.create(),data={"text": ""})
+        form = ExistingListTaskForm(for_list=List.objects.create(), data={"text": ""})
         # has a side effect of populating errors
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors['text'], [EMPTY_TASK_ERROR])

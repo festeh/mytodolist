@@ -1,8 +1,13 @@
+import unittest
+from unittest.mock import patch, Mock
+
 from django.contrib.auth import get_user_model
+from django.http import HttpRequest
 from django.test import TestCase
 
 from lists.forms import TaskForm, EMPTY_TASK_ERROR, DUPLICATING_TASK_ERROR, ExistingListTaskForm
 from lists.models import List, Task
+from lists.views import new_list
 
 
 class HomePageTest(TestCase):
@@ -100,7 +105,7 @@ class ListViewTest(TestCase):
 User = get_user_model()
 
 
-class NewListTest(TestCase):
+class NewListViewIntegratedTest(TestCase):
     def test_can_save_post_request(self):
         self.client.post("/lists/new", data={"text": "A new task"})
         self.assertEqual(Task.objects.count(), 1)
@@ -136,6 +141,47 @@ class NewListTest(TestCase):
         self.client.post("/lists/new", data={"text": "some task"})
         task_list = List.objects.first()
         self.assertEqual(task_list.owner, user)
+
+
+@patch("lists.views.NewListTaskForm")
+class NewListViewUnitTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.request = HttpRequest()
+        self.request.POST["text"] = "my new task"
+        self.request.user = Mock()
+
+    def test_POST_data_passed_new_form(self, mock_new_task_list_form: Mock):
+        new_list(self.request)
+        mock_new_task_list_form.assert_called_once_with(data=self.request.POST)
+
+    def test_saves_form_with_owner_if_form_is_valid(self, mock_new_task_list_form):
+        mock_form = mock_new_task_list_form.return_value
+        mock_form.is_valid.return_value = True
+        new_list(self.request)
+        mock_form.save.assert_called_once_with(owner=self.request.user)
+
+    @patch("lists.views.redirect")
+    def test_redirects_to_form_return_object_if_form_is_valid(self, mock_redirect, mock_new_task_list_form):
+        mock_form = mock_new_task_list_form.return_value
+        mock_form.is_valid.return_value = True
+        response = new_list(self.request)
+        self.assertEqual(response, mock_redirect.return_value)
+        mock_redirect.assert_called_once_with(mock_form.save.return_value)
+
+    @patch("lists.views.render")
+    def test_renders_home_page_if_form_is_invalid(self, mock_render, mock_new_task_list_form):
+        mock_form = mock_new_task_list_form.return_value
+        mock_form.is_valid.return_value = False
+        response = new_list(self.request)
+        self.assertEqual(response, mock_render.return_value)
+        mock_render.assert_called_once_with(self.request, 'home.html', {'form': mock_form})
+
+    def test_no_save_invalid_form(self, mock_new_task_list_form):
+        mock_form = mock_new_task_list_form.return_value
+        mock_form.is_valid.return_value = False
+        new_list(self.request)
+        self.assertFalse(mock_form.save.called)
+
 
 class MyListsTest(TestCase):
     def test_my_lists_template_rendered(self):

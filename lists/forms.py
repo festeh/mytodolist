@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.forms import TextInput, ModelForm
 
-from lists.models import Task
+from lists.models import Task, List
 
 EMPTY_TASK_ERROR = 'Cannot add an empty task'
 DUPLICATING_TASK_ERROR = 'Cannot add a duplicating task'
@@ -23,9 +23,13 @@ class TaskForm(ModelForm):
             }
         }
 
-    def save(self, for_list):
-        self.instance.list = for_list
-        return super().save()
+
+class NewListTaskForm(TaskForm):
+    def save(self, owner):
+        if owner.is_authenticated:
+            return List.create_new(first_task_text=self.cleaned_data["text"], owner=owner)
+        else:
+            return List.create_new(first_task_text=self.cleaned_data["text"])
 
 
 class ExistingListTaskForm(TaskForm):
@@ -39,6 +43,3 @@ class ExistingListTaskForm(TaskForm):
         except ValidationError as e:
             e.error_dict = {'text': [DUPLICATING_TASK_ERROR]}
             self._update_errors(e)
-
-    def save(self):
-        return ModelForm.save(self)
