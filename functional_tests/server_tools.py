@@ -1,4 +1,4 @@
-from fabric.context_managers import shell_env
+from fabric.context_managers import shell_env, settings
 from fabric.operations import run
 
 
@@ -6,11 +6,13 @@ def create_server_pre_auth_server(host, email):
     manage_command = f"~/sites/{host}/virutalenv/bin/python/ ~/sites/{host}/manage.py"
     env_lines = run(f"cat ~/sites/{host}/.env").splitlines()
     env = dict(l.split("=") for l in env_lines if l)
-    with shell_env(**env):
-        session_key = run(f"{manage_command} create_session {email}")
-        return session_key.strip()
+    with settings(host_string=f'{host}'):
+        with shell_env(**env):
+            session_key = run(f"{manage_command} create_session {email}")
+            return session_key.strip()
 
 
 def reset_database(host):
     manage_command = f"~/sites/{host}/virutalenv/bin/python/ ~/sites/{host}/manage.py"
-    run(manage_command)
+    with settings(host_string=f'{host}'):
+        run(manage_command)
