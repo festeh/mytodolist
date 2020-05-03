@@ -31,9 +31,7 @@ class TaskValidationTest(FunctionalTest):
     def test_cannot_add_duplicating_task(self):
         self.browser.get(self.live_server_url)
         # I'm adding a task
-        self.get_input_box_id().send_keys("Get some stuff done")
-        self.get_input_box_id().send_keys(Keys.ENTER)
-        self.wait_for_row_task_table("1: Get some stuff done")
+        self.add_task_to_list("Get some stuff done")
         # I'm trying to add a same task
         self.get_input_box_id().send_keys("Get some stuff done")
         self.get_input_box_id().send_keys(Keys.ENTER)
@@ -43,9 +41,7 @@ class TaskValidationTest(FunctionalTest):
     def test_duplication_message_are_not_shown_after_edit(self):
         self.browser.get(self.live_server_url)
         # I'm adding a task
-        self.get_input_box_id().send_keys("Get some stuff done")
-        self.get_input_box_id().send_keys(Keys.ENTER)
-        self.wait_for_row_task_table("1: Get some stuff done")
+        self.add_task_to_list("Get some stuff done")
         # I'm trying to add a same task
         self.get_input_box_id().send_keys("Get some stuff done")
         self.get_input_box_id().send_keys(Keys.ENTER)
