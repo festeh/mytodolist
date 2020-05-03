@@ -1,4 +1,5 @@
 import string
+from os import getenv
 from random import choices
 
 from fabric.api import env, run, cd, local
@@ -29,6 +30,7 @@ def _create_or_update_dotenv():
     if 'DJANGO_SECRET_KEY' not in current_contents:
         secret_key = ''.join(choices(string.ascii_letters, k=50))
         append('.env', f'DJANGO_SECRET_KEY={secret_key}')
+    append('.env', f'EMAILPASSWORD={getenv("EMAILPASSWORD")}')
 
 
 def _update_static_files():
