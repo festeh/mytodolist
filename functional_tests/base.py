@@ -3,7 +3,8 @@ import time
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
-from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import WebDriverException, NoSuchElementException
+from selenium.webdriver.common.keys import Keys
 
 from functional_tests.server_tools import reset_database
 
@@ -59,3 +60,12 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def get_input_box_id(self):
         return self.browser.find_element_by_id("id_text")
+
+    def add_task_to_list(self, task_text):
+        n_rows = len(self.browser.find_elements_by_css_selector("#id_task_table tr"))
+        self.get_input_box_id().send_keys(task_text)
+        self.get_input_box_id().send_keys(Keys.ENTER)
+        task_num = n_rows + 1
+        self.wait_for_row_task_table(f"{task_num}: {task_text}")
+
+
