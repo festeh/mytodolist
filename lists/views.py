@@ -27,8 +27,10 @@ def view_list(request, list_id):
 def new_list(request):
     form = TaskForm(data=request.POST)
     if form.is_valid():
-        task_list = List.objects.create()
-        task_list.owner = request.user
+        task_list = List()
+        if request.user.is_authenticated:
+            task_list.owner = request.user
+        task_list.save()
         form.save(for_list=task_list)
         return redirect(task_list)
     else:

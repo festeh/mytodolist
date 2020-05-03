@@ -1,10 +1,13 @@
+from django.conf import settings
 from django.db import models
+from django.db.models import ForeignKey
 from django.urls import reverse
 
 
 class List(models.Model):
     def get_absolute_url(self):
         return reverse('view_list', args=[self.id])
+    owner = ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
 
 
 class Task(models.Model):
