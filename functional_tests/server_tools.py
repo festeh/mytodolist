@@ -15,4 +15,4 @@ def create_server_pre_auth_server(host, email):
 def reset_database(host):
     manage_command = f"~/sites/{host}/virtualenv/bin/python ~/sites/{host}/manage.py"
     with settings(host_string=f'dima@{host}'):
-        run(manage_command)
+        run(f"{manage_command} flush --noinput")
