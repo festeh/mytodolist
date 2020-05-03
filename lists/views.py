@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.http import HttpRequest
 from django.shortcuts import render, redirect
@@ -26,12 +27,17 @@ def view_list(request, list_id):
 def new_list(request):
     form = TaskForm(data=request.POST)
     if form.is_valid():
-        list_ = List.objects.create()
-        form.save(for_list=list_)
-        return redirect(list_)
+        task_list = List.objects.create()
+        task_list.owner = request.user
+        form.save(for_list=task_list)
+        return redirect(task_list)
     else:
         return render(request, "home.html", {"form": form})
 
 
+User = get_user_model()
+
+
 def my_lists(request, email):
-    return render(request, "my_lists.html")
+    owner = User.objects.get(email=email)
+    return render(request, "my_lists.html", {"owner": owner})

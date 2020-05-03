@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from lists.forms import TaskForm, EMPTY_TASK_ERROR, DUPLICATING_TASK_ERROR, ExistingListTaskForm
@@ -96,6 +97,9 @@ class ListViewTest(TestCase):
         self.assertContains(response, 'name="text"')
 
 
+User = get_user_model()
+
+
 class NewListTest(TestCase):
     def test_can_save_post_request(self):
         self.client.post("/lists/new", data={"text": "A new task"})
@@ -126,8 +130,21 @@ class NewListTest(TestCase):
         self.assertEqual(List.objects.count(), 0)
         self.assertEqual(Task.objects.count(), 0)
 
+    def test_new_list_has_owner(self):
+        user = User.objects.create(email="a@b.com")
+        self.client.force_login(user)
+        self.client.post("/lists/new", data={"text": "some task"})
+        task_list = List.objects.first()
+        self.assertEqual(task_list.owner, user)
 
 class MyListsTest(TestCase):
     def test_my_lists_template_rendered(self):
+        User.objects.create(email="a@b.com")
         response = self.client.get("/lists/users/a@b.com/")
         self.assertTemplateUsed(response, "my_lists.html")
+
+    def test_correct_owner_is_passed_to_template(self):
+        wrong_user = User.objects.create(email="kek@cheburek.com")
+        right_user = User.objects.create(email="a@b.com")
+        response = self.client.get("/lists/users/a@b.com/")
+        self.assertEqual(response.context["owner"], right_user)
