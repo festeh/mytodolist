@@ -27,6 +27,11 @@ def wait(fn):
 
 class FunctionalTest(StaticLiveServerTestCase):
     def setUp(self) -> None:
+        options = webdriver.ChromeOptions()
+        options.add_argument("--headless")
+        options.add_argument("--disable-extensions")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--no-sandbox")
         self.browser = webdriver.Chrome()
         self.staging_server = os.environ.get("STAGING_SERVER")
         if self.staging_server:
