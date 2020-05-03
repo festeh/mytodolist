@@ -6,7 +6,7 @@ def create_server_pre_auth_server(host, email):
     manage_command = f"~/sites/{host}/virutalenv/bin/python/ ~/sites/{host}/manage.py"
     env_lines = run(f"cat ~/sites/{host}/.env").splitlines()
     env = dict(l.split("=") for l in env_lines if l)
-    with settings(host_string=f'{host}'):
+    with settings(host_string=f'dima@{host}'):
         with shell_env(**env):
             session_key = run(f"{manage_command} create_session {email}")
             return session_key.strip()
@@ -14,5 +14,5 @@ def create_server_pre_auth_server(host, email):
 
 def reset_database(host):
     manage_command = f"~/sites/{host}/virutalenv/bin/python/ ~/sites/{host}/manage.py"
-    with settings(host_string=f'{host}'):
+    with settings(host_string=f'dima@{host}'):
         run(manage_command)
