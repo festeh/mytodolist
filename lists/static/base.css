@@ -23,3 +23,10 @@
      font-family: 'Fontawesome', cursive;
      font-size: 30px;
  }
+
+.govno {
+  float: none;
+  display: table-cell;
+    vertical-align: bottom;
+    border:3px solid pink;
+}

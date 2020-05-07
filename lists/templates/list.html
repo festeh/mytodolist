@@ -17,8 +17,24 @@
 
 {% block extra_content %}
     {% if user.email %}
-        <form class="navbar-form navbar-right" method="post" action="{% url 'share_list' list.id %}">
-            <span>Share</span> <input class="form-control" name="share" type="text" placeholder="your-friend@example.com"/> {% csrf_token %}
-        </form>
+
+        <div class="row">
+            <div class="col-md-6">
+                <h4>Shared with</h4>
+                <ul>
+                    {% for user in list.shared_with.all %}
+                        <li class="list-share">{{ user.email }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="col-md-6 text-center">
+                <form method="post" action="{% url 'share_list' list.id %}">
+                    <div class="form-group">
+                        <h4>Share</h4>
+                        <input class="form-control" name="share" type="text" placeholder="your-friend@example.com"/> {% csrf_token %}
+                    </div>
+                </form>
+            </div>
+        </div>
     {% endif %}
 {% endblock %}

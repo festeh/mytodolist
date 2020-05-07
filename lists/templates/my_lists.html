@@ -1,14 +1,26 @@
 {% extends 'base.html' %}
 
-{% block header_text %}My Task Lists{% endblock %}
+{% block header_text %}
+    <div class="row">My Task Lists</div>{% endblock %}
 {% block task_form %}{% endblock %}
 {% block extra_content %}
-    <h2>{{ owner.email }}'s tasks</h2>
-    <ul>
-    {% for task_list in owner.list_set.all %}
-        <li><a href={{ task_list.get_absolute_url }}> {{ task_list.name }}</a></li>
-    {% endfor %}
-    
-    </ul>
+{#    <div class="row">#}
+        <h2>{{ owner.email }}'s tasks</h2>
+        <ul>
+            {% for task_list in owner.list_set.all %}
+                <li><a href={{ task_list.get_absolute_url }}> {{ task_list.name }}</a></li>
+            {% endfor %}
+
+        </ul>
+
+    <h2>Shared tasks</h2>
+        <ul>
+            {% for task_list in owner.sharedlists.all %}
+                <li><a href={{ task_list.get_absolute_url }}>{{ task_list.name }}</a></li>
+            {% endfor %}
+
+        </ul>
+{#    </div>#}
+
 {% endblock %}
 

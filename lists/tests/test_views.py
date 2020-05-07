@@ -204,7 +204,7 @@ class ShareListTest(TestCase):
         User.objects.create(email=self.sender_email)
         User.objects.create(email=self.receiver_email)
         self.request = HttpRequest()
-        self.request.POST["email"] = self.receiver_email
+        self.request.POST["share"] = self.receiver_email
         self.request.user = Mock()
         self.task_list = List.objects.create()
 
@@ -215,6 +215,6 @@ class ShareListTest(TestCase):
 
     def test_able_to_share_with_other(self):
         self.client.post(f"/lists/{self.task_list.id}/share",
-                         data={"email": self.receiver_email})
+                         data={"share": self.receiver_email})
         receiver = User.objects.get(email=self.receiver_email)
         self.assertIn(receiver, self.task_list.shared_with.all())

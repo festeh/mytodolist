@@ -33,7 +33,7 @@ class ListPage:
         return self.browser.find_element_by_css_selector("input[name='share']")
 
     def get_shared_with_list(self):
-        return self.browser.find_element_by_css_selector(".list-share")
+        return self.browser.find_elements_by_css_selector(".list-share")
 
     def share_task_list_with(self, email):
         self.get_share_box().send_keys(email)
