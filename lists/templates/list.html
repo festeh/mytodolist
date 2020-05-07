@@ -5,11 +5,20 @@
 {% block form_action %}{% url 'view_list' list.id %}{% endblock %}
 
 {% block table %}
-<table id="id_task_table" class="table">
-    {% for task in list.task_set.all %}
-        <tr>
-            <td>{{ forloop.counter }}: {{ task.text }}</td>
-        </tr>
-    {% endfor %}
-</table>
+    <table id="id_task_table" class="table">
+        {% for task in list.task_set.all %}
+            <tr>
+                <td>{{ forloop.counter }}: {{ task.text }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
+
+
+{% block extra_content %}
+    {% if user.email %}
+        <form class="navbar-form navbar-right" method="post" action="{% url 'share_list' list.id %}">
+            <span>Share</span> <input class="form-control" name="share" type="text" placeholder="your-friend@example.com"/> {% csrf_token %}
+        </form>
+    {% endif %}
 {% endblock %}

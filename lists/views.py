@@ -38,3 +38,8 @@ User = get_user_model()
 def my_lists(request, email):
     owner = User.objects.get(email=email)
     return render(request, "my_lists.html", {"owner": owner})
+
+
+def share_list(request, list_id):
+    list_ = List.objects.get(id=list_id)
+    return redirect(list_)

@@ -7,7 +7,7 @@ from django.test import TestCase
 
 from lists.forms import TaskForm, EMPTY_TASK_ERROR, DUPLICATING_TASK_ERROR, ExistingListTaskForm
 from lists.models import List, Task
-from lists.views import new_list
+from lists.views import new_list, share_list
 
 
 class HomePageTest(TestCase):
@@ -194,3 +194,16 @@ class MyListsTest(TestCase):
         right_user = User.objects.create(email="a@b.com")
         response = self.client.get("/lists/users/a@b.com/")
         self.assertEqual(response.context["owner"], right_user)
+
+@patch("lists.views.redirect")
+class ShareListTest(TestCase):
+
+    def setUp(self) -> None:
+        self.request = HttpRequest()
+        self.request.POST["email"] = "baklanch@ik.ru"
+        self.request.user = Mock()
+        self.task_list = List.objects.create()
+
+    def test_post_redirects_to_lists_page(self, mock_redirect):
+        share_list(self.request, self.task_list.id)
+        mock_redirect.assert_called_once_with(self.task_list)
