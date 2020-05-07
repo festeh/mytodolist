@@ -195,15 +195,26 @@ class MyListsTest(TestCase):
         response = self.client.get("/lists/users/a@b.com/")
         self.assertEqual(response.context["owner"], right_user)
 
-@patch("lists.views.redirect")
+
 class ShareListTest(TestCase):
 
     def setUp(self) -> None:
+        self.sender_email = "kabanch@ik.ru"
+        self.receiver_email = "baklanch@ik.ru"
+        User.objects.create(email=self.sender_email)
+        User.objects.create(email=self.receiver_email)
         self.request = HttpRequest()
-        self.request.POST["email"] = "baklanch@ik.ru"
+        self.request.POST["email"] = self.receiver_email
         self.request.user = Mock()
         self.task_list = List.objects.create()
 
+    @patch("lists.views.redirect")
     def test_post_redirects_to_lists_page(self, mock_redirect):
         share_list(self.request, self.task_list.id)
         mock_redirect.assert_called_once_with(self.task_list)
+
+    def test_able_to_share_with_other(self):
+        self.client.post(f"/lists/{self.task_list.id}/share",
+                         data={"email": self.receiver_email})
+        receiver = User.objects.get(email=self.receiver_email)
+        self.assertIn(receiver, self.task_list.shared_with.all())

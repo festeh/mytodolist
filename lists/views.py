@@ -41,5 +41,6 @@ def my_lists(request, email):
 
 
 def share_list(request, list_id):
-    list_ = List.objects.get(id=list_id)
-    return redirect(list_)
+    task_list = List.objects.get(id=list_id)
+    task_list.shared_with.add(request.POST["email"])
+    return redirect(task_list)

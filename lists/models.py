@@ -1,10 +1,14 @@
 from django.conf import settings
 from django.db import models
+from django.db.models import ManyToManyField
 from django.urls import reverse
+
+from accounts.models import User
 
 
 class List(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
+    shared_with = ManyToManyField(User, "sharedlists")
 
     def get_absolute_url(self):
         return reverse('view_list', args=[self.id])

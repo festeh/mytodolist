@@ -60,3 +60,10 @@ class ListModelTest(TestCase):
         Task.objects.create(list=task_list, text="First task")
         Task.objects.create(list=task_list, text="Second task")
         self.assertEqual(task_list.name, "First task")
+
+    def test_shared_with(self):
+        email = "kek@cheburek.com"
+        user = User.objects.create(email=email)
+        task_list = List.create_new("boo")
+        task_list.shared_with.add(email)
+        self.assertIn(user, task_list.shared_with.all())
