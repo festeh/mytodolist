@@ -1,3 +1,5 @@
+import time
+
 from functional_tests.base import FunctionalTest
 from functional_tests.list_page import ListPage
 
@@ -12,18 +14,19 @@ def force_quit(browser):
 class SharingTest(FunctionalTest):
     def test_can_share_list_with_others(self):
         # We have two users
-        self.create_pre_authd_session("kabanch@ik.ru")
         kabanchik_browser = self.browser
+        self.create_pre_authd_session("kabanch@ik.ru")
         self.addCleanup(lambda: force_quit(kabanchik_browser))
 
-        self.create_pre_authd_session("baklanch@ik.ru")
         baklanchik_browser = self.setup_browser()
+        self.browser = baklanchik_browser
+        self.create_pre_authd_session("baklanch@ik.ru")
         self.addCleanup(lambda: force_quit(baklanchik_browser))
 
         # first user creates a task
-        kabanchik_browser.get(self.live_server_url)
+        self.browser = kabanchik_browser
+        self.browser.get(self.live_server_url)
         kabanchik_page = ListPage(self).add_task_to_list("Tosi bosi")
-
         share_box = kabanchik_page.get_share_box()
         self.assertEqual(share_box.get_attribute("placeholder"),
                          "your-friend@example.com")

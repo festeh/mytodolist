@@ -5,6 +5,7 @@
 {% block form_action %}{% url 'view_list' list.id %}{% endblock %}
 
 {% block table %}
+    <h4>Owner: <span id="id_list_owner">{{ list.owner.email }}</span></h4>
     <table id="id_task_table" class="table">
         {% for task in list.task_set.all %}
             <tr>
